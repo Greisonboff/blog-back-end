@@ -11,7 +11,8 @@ const app = express();
 // Configuração correta do CORS
 app.use(
   cors({
-    origin: "http://localhost:3000", // origem do seu front-end
+    origin: process.env.CURRENT_SITE_URL, // origem do seu front-end
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true, // necessário se usar cookies ou headers de auth
   }),
 );
@@ -37,11 +38,13 @@ app.use("/post", postRoutes);
 const user = process.env.DB_USER;
 const password = process.env.DB_PASSWORD;
 
-console.log("user", user, "password", password);
 mongoose
   .connect(
     `mongodb+srv://${user}:${password}@cluster0.a1jj7bx.mongodb.net/?appName=Cluster0`,
-    {},
+    {
+      tls: true,
+      serverSelectionTimeoutMS: 10000,
+    },
   )
   .then(() => {
     console.log("Mongoose is connected");
