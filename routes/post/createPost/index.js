@@ -1,0 +1,66 @@
+const express = require('express');
+const router = express.Router();
+
+const Post = require("../../../models/Post");
+const jwt = require('jsonwebtoken');
+const authMiddleware = require('../../../middleware/authMiddleware');
+const Person = require('../../../models/Person');
+
+const { ObjectId } = require('mongodb');
+
+const multer = require('multer');
+
+const path = require('path');
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: 'public/uploads/post',
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname);
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+    }
+  }),
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype == "image/png" || file.mimetype == "image/jpg" || file.mimetype == "image/jpeg") {
+      cb(null, true);
+    } else {
+      cb(new Error('Only .png, .jpg and .jpeg format allowed!'), false);
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 },
+});
+
+//create
+router.post("/", upload.array('images', 5), authMiddleware, async (req, res) => {
+  const { title, description, category, content } = req.body;
+
+  let imagesPath = null;
+
+  if (req.files && req.files.length > 0) {
+    imagesPath = req.files.map(file => `/uploads/post/${file.filename}`);
+  }
+
+  if (!title) {
+    return res.status(422).json({ isValid: false, error: "title is required" });
+  }
+
+  if (!content) {
+    return res.status(422).json({ isValid: false, error: "content is required" });
+  }
+
+  const token = req.cookies.token;
+
+  const decodedUserId = jwt.verify(token, process.env.JWT_SECRET);
+
+  const post = { title, description, category, content, images: imagesPath, user: decodedUserId.id };
+
+  try {
+    await Post.create(post);
+    res.status(200).json({ isValid: true, message: "Post created successfully" });
+  } catch (error) {
+    res.status(500).json({ isValid: false, error: error });
+  }
+})
+
+module.exports = router;

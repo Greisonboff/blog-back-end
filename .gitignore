@@ -1,0 +1,4 @@
+.env
+node_modules
+# Ignorar a pasta de uploads
+/public/uploads
