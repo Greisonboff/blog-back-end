@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const path = require("path");
+const dns = require("dns");
 
 require("dotenv").config();
 
@@ -35,16 +36,18 @@ app.use("/person", personRoutes);
 const postRoutes = require("./routes/post");
 app.use("/post", postRoutes);
 
+// Define servidores DNS globalmente para o Node.js
+// Usando Cloudflare (1.1.1.1) e Google DNS (8.8.8.8)
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
+
 const user = process.env.DB_USER;
 const password = process.env.DB_PASSWORD;
+const database = process.env.DB_NAME;
 
 mongoose
   .connect(
-    `mongodb+srv://${user}:${password}@cluster0.a1jj7bx.mongodb.net/?appName=Cluster0`,
-    {
-      tls: true,
-      serverSelectionTimeoutMS: 10000,
-    },
+    `mongodb+srv://${user}:${password}@cluster0.a1jj7bx.mongodb.net/${database}?appName=Cluster0`,
+    {},
   )
   .then(() => {
     console.log("Mongoose is connected");
