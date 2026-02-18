@@ -32,6 +32,10 @@ function formatPostData(posts, decoded) {
       };
     });
 
+    updatedComments.sort(
+      (a, b) => new Date(b.commentedAt) - new Date(a.commentedAt),
+    );
+
     return {
       ...post,
       comments: updatedComments,
