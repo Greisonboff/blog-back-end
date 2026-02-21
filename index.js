@@ -36,6 +36,9 @@ app.use("/person", personRoutes);
 const postRoutes = require("./routes/post");
 app.use("/post", postRoutes);
 
+const weeklyRoutes = require("./routes/weekly-save");
+app.use("/weekly-save", weeklyRoutes);
+
 // Define servidores DNS globalmente para o Node.js
 // Usando Cloudflare (1.1.1.1) e Google DNS (8.8.8.8)
 dns.setServers(["1.1.1.1", "8.8.8.8"]);
