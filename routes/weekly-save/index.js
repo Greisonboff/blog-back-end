@@ -9,8 +9,8 @@ Sua tarefa é:
 1. Identificar o assunto de tecnologia mais comentado e relevante da semana atual.
 2. Retornar somente um assunto da semana atual.
 3. Gerar para o assunto:
-   - "title": um título curto e chamativo (máximo 10 caracteres)
-   - "description": um resumo claro e informativo (máximo 30 caracteres)
+   - "title": um título curto e chamativo (máximo 30 caracteres)
+   - "description": um resumo claro e informativo (máximo 150 caracteres)
 
 ⚠️ Regras importantes:
 - Retorne APENAS um JSON válido.
