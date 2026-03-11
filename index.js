@@ -12,10 +12,11 @@ const app = express();
 // Configuração correta do CORS
 app.use(
   cors({
-    origin:
+    origin: [
       process.env.CURRENT_SITE_URL ||
-      process.env.CURRENT_SITE_URL_NEW ||
-      "http://localhost:3000", // origem do seu front-end
+        process.env.CURRENT_SITE_URL_NEW ||
+        "http://localhost:3000",
+    ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true, // necessário se usar cookies ou headers de auth
   }),
