@@ -5,112 +5,68 @@ const Person = require("../../../models/Person");
 const { hashPassword } = require("../../../utils/hashPassword");
 const { isValidEmail } = require("../../../utils/isValidEmail");
 const authMiddleware = require("../../../middleware/authMiddleware");
-const jwt = require("jsonwebtoken");
-const { deleteOldImage } = require("../../../utils/deleleOldImags");
-const path = require("path");
-
-const errorImageTypeMessage = "Only .png, .jpg and .jpeg format allowed!";
 const multer = require("multer");
+const { handleImageUpload } = require("../../../middleware/handleImageUpload");
+
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: "public/uploads/userAvatar",
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname);
-      const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-      cb(null, file.fieldname + "-" + uniqueSuffix + ext);
-    },
-  }),
-  fileFilter: (req, file, cb) => {
-    if (
-      file.mimetype == "image/png" ||
-      file.mimetype == "image/jpg" ||
-      file.mimetype == "image/jpeg"
-    ) {
-      cb(null, true);
-    } else {
-      cb(new Error(errorImageTypeMessage), false);
-    }
-  },
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
 });
 
-//update user by id
 router.patch(
   "/",
   authMiddleware,
-  (req, res, next) => {
-    upload.single("img")(req, res, function (err) {
-      if (err === errorImageTypeMessage) {
-        return res.status(422).json({
-          isValid: false,
-          error: "Only .png, .jpg and .jpeg format allowed!",
-        });
-      }
-      if (err) {
-        return res.status(500).json({
-          isValid: false,
-          error: err.message,
-        });
-      }
-      next();
-    });
+  upload.single("img"),
+  async (req, next) => {
+    const currentPerson = await Person.findById(req.user.id);
+    req.currentImagePublicId = currentPerson.img?.public_id;
+    next();
   },
+  handleImageUpload,
   async (req, res) => {
-    const token = req.cookies.token;
+    try {
+      const userId = req.user.id;
 
-    const decodedUserId = token
-      ? jwt.verify(token, process.env.JWT_SECRET)
-      : { id: null };
+      const { name, email, password, confirmPassword, img } = req.body;
 
-    const { name, email, password, confirmPassword, img } = req.body;
-
-    const person = {};
-
-    const imagePath = req.file
-      ? `/uploads/userAvatar/${req.file.filename}`
-      : null;
-
-    const currentPerson = await Person.findOne({ _id: decodedUserId.id });
-
-    if (imagePath || img === "null") {
-      person.img = imagePath;
-      deleteOldImage(currentPerson.img);
-    }
-
-    if (!name && !email && !password && !confirmPassword) {
-      return res
-        .status(422)
-        .json({ error: "At least one field must be sent", isValid: false });
-    }
-
-    if (password && password !== confirmPassword) {
-      return res
-        .status(422)
-        .json({ error: "passwords do not match", isValid: false });
-    }
-
-    if (name) {
-      person.name = name;
-    }
-
-    if (email) {
-      if (!isValidEmail(email)) {
+      if (!name && !email && !password && !confirmPassword) {
         return res
           .status(422)
-          .json({ error: "email is invalid", isValid: false });
+          .json({ error: "At least one field must be sent", isValid: false });
       }
-      person.email = email;
-    }
 
-    if (password) {
-      person.password = await hashPassword(password);
-    }
+      const imagePath = req.uploadedImage;
 
-    try {
-      const updatedPerson = await Person.updateOne(
-        { _id: decodedUserId.id },
-        person,
-      );
+      const person = {};
+
+      if (imagePath || img === "null") {
+        person.img = imagePath;
+      }
+
+      if (password && password !== confirmPassword) {
+        return res
+          .status(422)
+          .json({ error: "passwords do not match", isValid: false });
+      }
+
+      if (name) {
+        person.name = name;
+      }
+
+      if (email) {
+        if (!isValidEmail(email)) {
+          return res
+            .status(422)
+            .json({ error: "email is invalid", isValid: false });
+        }
+        person.email = email;
+      }
+
+      if (password) {
+        person.password = await hashPassword(password);
+      }
+
+      const updatedPerson = await Person.updateOne({ _id: userId }, person);
 
       if (updatedPerson.matchedCount === 0) {
         return res
