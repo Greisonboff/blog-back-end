@@ -13,9 +13,9 @@ const app = express();
 app.use(
   cors({
     origin: [
-      process.env.CURRENT_SITE_URL ||
-        process.env.CURRENT_SITE_URL_NEW ||
-        "http://localhost:3000",
+      process.env.CURRENT_SITE_URL,
+      process.env.CURRENT_SITE_URL_NEW,
+      "http://localhost:3000",
     ].filter(Boolean),
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true, // necessário se usar cookies ou headers de auth
