@@ -10,7 +10,7 @@ Sua tarefa é:
 2. Retornar somente um assunto da semana atual.
 3. Gerar para o assunto:
    - "title": um título curto e chamativo (máximo 30 caracteres)
-   - "description": um resumo claro e informativo (máximo 150 caracteres)
+   - "description": um resumo claro e informativo
 
 ⚠️ Regras importantes:
 - Retorne APENAS um JSON válido.
@@ -77,6 +77,7 @@ router.post("/", async (req, res) => {
       title: topic.title,
       content: topic.description,
       user: process.env.ADMIN_ID,
+      images: null,
     });
 
     // Lógica para salvar os dados da semana
