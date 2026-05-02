@@ -17,9 +17,15 @@ router.patch(
   "/",
   authMiddleware,
   upload.single("img"),
-  async (req, next) => {
+  async (req, res, next) => {
     const currentPerson = await Person.findById(req.user.id);
+
+    if (!currentPerson) {
+      return res.status(424).json({ message: "Person not found" });
+    }
+
     req.currentImagePublicId = currentPerson.img?.public_id;
+    req.currentPerson = currentPerson;
     next();
   },
   handleImageUpload,
@@ -27,7 +33,15 @@ router.patch(
     try {
       const userId = req.user.id;
 
-      const { name, email, password, confirmPassword, img } = req.body;
+      const { name, email, img, password, confirmPassword } = req.body;
+
+      const { currentPerson } = req;
+
+      console.log("Received data:", {
+        name,
+        email,
+        img,
+      });
 
       if (!name && !email && !password && !confirmPassword) {
         return res
@@ -49,11 +63,11 @@ router.patch(
           .json({ error: "passwords do not match", isValid: false });
       }
 
-      if (name) {
+      if (name && currentPerson.name !== name) {
         person.name = name;
       }
 
-      if (email) {
+      if (email && currentPerson.email !== email) {
         if (!isValidEmail(email)) {
           return res
             .status(422)
@@ -80,6 +94,7 @@ router.patch(
         person: person,
       });
     } catch (error) {
+      console.error(error);
       res.status(500).json({ error: error, isValid: false });
     }
   },
