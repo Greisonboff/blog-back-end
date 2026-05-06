@@ -55,6 +55,8 @@ router.patch(
 
       if (imagePath || img === "null") {
         person.img = imagePath;
+      } else if (img === "delete") {
+        person.img = null;
       }
 
       if (password && password !== confirmPassword) {
