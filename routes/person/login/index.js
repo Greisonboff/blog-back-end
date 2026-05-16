@@ -32,8 +32,9 @@ router.post("/login", async (req, res) => {
       user?.password.toString(),
     );
 
-    if (!valid)
+    if (!valid) {
       return res.status(401).json({ isValid: false, error: "Senha inválida" });
+    }
 
     const token = generateToken(user._id);
 
@@ -56,7 +57,8 @@ router.post("/login", async (req, res) => {
         },
       });
   } catch (error) {
-    res.status(500).json({ error: error ? error : "Internal server error" });
+    console.error(error);
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
 });
 

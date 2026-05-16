@@ -56,7 +56,7 @@ router.patch(
         .json({ isValid: true, message: "Comment updated successfully" });
     } catch (error) {
       console.log(error);
-      res.status(500).json({ isValid: false, error: error });
+      res.status(500).json({ isValid: false, error: "Internal server error" });
     }
   },
 );

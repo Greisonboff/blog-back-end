@@ -97,7 +97,7 @@ router.patch(
       });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: error, isValid: false });
+      res.status(500).json({ error: "Internal server error", isValid: false });
     }
   },
 );

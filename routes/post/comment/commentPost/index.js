@@ -1,12 +1,12 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
 const Post = require("../../../../models/Post");
 const Person = require("../../../../models/Person");
-const jwt = require('jsonwebtoken');
-const authMiddleware = require('../../../../middleware/authMiddleware');
+const jwt = require("jsonwebtoken");
+const authMiddleware = require("../../../../middleware/authMiddleware");
 
-const { ObjectId } = require('mongodb');
+const { ObjectId } = require("mongodb");
 
 //comment
 router.patch("/comment", authMiddleware, async (req, res) => {
@@ -27,17 +27,19 @@ router.patch("/comment", authMiddleware, async (req, res) => {
 
   const commentObj = {
     comment,
-    user: userId
+    user: userId,
   };
 
   try {
     await Post.findByIdAndUpdate(id, {
       $addToSet: { comments: commentObj },
     });
-    res.status(200).json({ isValid: true, message: "Comment added successfully" });
+    res
+      .status(200)
+      .json({ isValid: true, message: "Comment added successfully" });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: error });
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
-})
+});
 
 module.exports = router;

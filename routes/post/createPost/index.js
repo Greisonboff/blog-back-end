@@ -41,17 +41,13 @@ router.post(
         .json({ isValid: false, error: "content is required" });
     }
 
-    const token = req.cookies.token;
-
-    const decodedUserId = jwt.verify(token, process.env.JWT_SECRET);
-
     const post = {
       title,
       description,
       category,
       content,
-      images: [imagePath.url],
-      user: decodedUserId.id,
+      images: imagePath?.url ? [imagePath.url] : [],
+      user: req.user.id,
     };
 
     try {
@@ -60,7 +56,7 @@ router.post(
         .status(200)
         .json({ isValid: true, message: "Post created successfully" });
     } catch (error) {
-      res.status(500).json({ isValid: false, error: error });
+      res.status(500).json({ isValid: false, error: "Internal server error" });
     }
   },
 );

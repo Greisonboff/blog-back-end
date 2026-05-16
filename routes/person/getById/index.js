@@ -2,13 +2,15 @@ const express = require("express");
 const router = express.Router();
 
 const Person = require("../../../models/Person");
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
 //get one user by id
 router.get("/id", async (req, res) => {
   const token = req.cookies.token;
 
-  const decodedUserId = token ? jwt.verify(token, process.env.JWT_SECRET) : { id: null };
+  const decodedUserId = token
+    ? jwt.verify(token, process.env.JWT_SECRET)
+    : { id: null };
 
   try {
     const person = await Person.findOne({ _id: decodedUserId.id });
@@ -20,12 +22,12 @@ router.get("/id", async (req, res) => {
     const data = {
       name: person.name,
       email: person.email,
-      img: person.img
-    }
+      img: person.img,
+    };
 
     res.status(200).json({ ...data });
   } catch (error) {
-    res.status(500).json({ error: error });
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
 });
 

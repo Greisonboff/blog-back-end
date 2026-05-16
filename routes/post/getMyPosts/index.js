@@ -37,7 +37,7 @@ router.post("/my-posts", authMiddleware, async (req, res) => {
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: error });
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
 });
 

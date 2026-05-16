@@ -77,7 +77,7 @@ router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
     if (error.message.includes("duplicate key error")) {
       return res.status(400).json({ error: "Email already exists" });
     }
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
 });
 

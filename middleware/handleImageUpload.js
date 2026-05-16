@@ -8,6 +8,10 @@ export const handleImageUpload = async (req, res, next) => {
     const file = req.file ? req.file : req.files[0];
     console.log("file", file);
 
+    if (!file) {
+      return next();
+    }
+
     const fileType = await fileTypeFromBuffer(file.buffer);
 
     if (!fileType || !["image/png", "image/jpeg"].includes(fileType.mime)) {

@@ -31,7 +31,7 @@ router.patch("/like", authMiddleware, async (req, res) => {
     });
     res.status(200).json({ isValid: true, message: "Post liked successfully" });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: error });
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
 });
 

@@ -108,7 +108,7 @@ router.patch(
         .status(200)
         .json({ isValid: true, message: "Post updated successfully" });
     } catch (error) {
-      res.status(500).json({ isValid: false, error: error });
+      res.status(500).json({ isValid: false, error: "Internal server error" });
     }
   },
 );

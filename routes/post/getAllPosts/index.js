@@ -41,7 +41,7 @@ router.get("/", async (req, res) => {
     });
   } catch (error) {
     console.log("error: ", error);
-    res.status(500).json({ isValid: false, error: error });
+    res.status(500).json({ isValid: false, error: "Internal server error" });
   }
 });
 
