@@ -11,7 +11,6 @@ Considere a data atual como referência para determinar a "semana atual".
 1. **Foco Único:** Identifique e retorne APENAS o assunto mais importante da semana. Não liste múltiplos tópicos.
 2. **Título ("title"):** Deve ser curto, chamativo, no estilo "clickbait do bem" (máximo de 30 a 35 caracteres). Deve instigar a leitura.
 3. **Descrição Ampliada ("description"):** Escreva um resumo robusto, claro e informativo (entre 3 a 5 parágrafos ou cerca de 150-200 palavras). O texto deve contextualizar o que aconteceu, por que isso importa para o mercado/usuário e qual o impacto dessa tecnologia para o futuro. O tom deve ser profissional, moderno e engajador.
-4. **Imagem ("image"):** Como você não tem acesso a upload de arquivos, gere uma URL de imagem válida utilizando o Unsplash Source baseado no assunto. Use o formato: https://images.unsplash.com/photo-[ID_RELEVANTE] ou use o Unsplash de busca por palavra-chave contextualizada ao tema (ex: https://source.unsplash.com/featured/?technology,[termo_em_ingles]).
 
 ### Regras Estritas de Formatação:
 - Retorne EXCLUSIVAMENTE um objeto JSON válido.
@@ -28,7 +27,12 @@ Considere a data atual como referência para determinar a "semana atual".
     "description": "Uma descrição detalhada, rica em contexto tecnológico, explicando o impacto da novidade, os pontos principais da discussão na comunidade e por que este é o assunto da semana.",
     "image": "https://images.unsplash.com/..."
   }
-}`;
+}
+
+- nao adicione nada fora do json, mantem apenas o json na estrutura solicitada
+- nao retonr "Aqui está o conteúdo inicial:" somente o json do exemplo
+`;
+
 router.post("/", async (req, res) => {
   if (req.headers.authorization !== process.env.CRON_SECRET) {
     return res.status(403).json({ error: "Não autorizado" });
