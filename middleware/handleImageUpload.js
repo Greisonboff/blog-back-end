@@ -6,7 +6,6 @@ export const handleImageUpload = async (req, res, next) => {
     if (!req.file && !req.files) return next();
 
     const file = req.file ? req.file : req.files[0];
-    console.log("file", file);
 
     if (!file) {
       return next();
