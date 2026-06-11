@@ -1,76 +1,49 @@
 const express = require("express");
 const Post = require("../../models/Post");
 const router = express.Router();
-const prompt = `Você é um especialista em tecnologia e tendências digitais.
-
-Sua tarefa é:
-
-1. Identificar o assunto de tecnologia mais comentado e relevante da semana atual.
-2. Retornar somente um assunto da semana atual.
-3. Gerar para o assunto:
-   - "title": um título curto e chamativo (máximo 30 caracteres)
-   - "description": um resumo claro e informativo
-
-⚠️ Regras importantes:
-- Retorne APENAS um JSON válido.
-- Não inclua explicações fora do JSON.
-- Não inclua markdown.
-- Não inclua texto adicional.
-- O JSON deve seguir exatamente este formato:
-- somente um assunto da semana atual.
-- em imagem coloque um link de imagem valido.
-
-{
-  "week_reference": "YYYY-MM-DD",
-  "topic": 
-    {
-      "title": "Título aqui",
-      "description": "Descrição aqui"
-      "image": "Imagem aqui"
-    }
-    
-}
-
-- Use português do Brasil.
-- Os assuntos devem ser reais e atuais.
-- Não invente informações.
-`;
+const { XMLParser } = require("fast-xml-parser");
 
 router.post("/", async (req, res) => {
   if (req.headers.authorization !== process.env.CRON_SECRET) {
     return res.status(403).json({ success: false, message: "não autorizado" });
   }
 
+  const getNews = await fetch("https://www.wired.com/feed/rss");
+  const xml = await getNews.text();
+
+  const parser = new XMLParser({
+    ignoreAttributes: false,
+  });
+
+  const rssObject = parser.parse(xml);
+
+  const article = rssObject.rss.channel.item[0];
+
   try {
-    const response = await fetch(
-      "https://router.huggingface.co/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.IA_TOKEN_HUGGINFACE}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "meta-llama/Meta-Llama-3-8B-Instruct",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-        }),
-      },
-    );
-
-    const data = await response.json();
-
-    const parsedData = JSON.parse(data.choices[0].message.content);
-
-    const topic = parsedData.topic;
+    //   const response = await fetch(
+    //     "https://router.huggingface.co/v1/chat/completions",
+    //     {
+    //       method: "POST",
+    //       headers: {
+    //         Authorization: `Bearer ${process.env.IA_TOKEN_HUGGINFACE}`,
+    //         "Content-Type": "application/json",
+    //         "Cache-Control": "no-cache",
+    //       },
+    //       body: JSON.stringify({
+    //         model: "meta-llama/Meta-Llama-3-8B-Instruct",
+    //         messages: [
+    //           {
+    //             role: "user",
+    //             content: prompt,
+    //           },
+    //         ],
+    //       }),
+    //     },
+    //   );
 
     await Post.create({
-      title: topic.title,
-      content: topic.description,
+      title: article.title.replace(/"/g, '\\"'),
+      content: article.description.replace(/"/g, '\\"'),
       user: process.env.ADMIN_ID,
       images: null,
     });
@@ -79,7 +52,14 @@ router.post("/", async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "dados salvos com sucesso",
-      data: data.choices[0].message.content,
+      data: {
+        week_reference: new Date().toISOString().split("T")[0],
+        topic: {
+          title: article.title.replace(/"/g, '\\"'),
+          description: article.description.replace(/"/g, '\\"'),
+          image: null,
+        },
+      },
     });
   } catch (error) {
     console.error("erro ao salvar dados:", error);
