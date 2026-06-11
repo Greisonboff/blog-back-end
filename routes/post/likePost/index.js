@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const Post = require("../../../models/Post");
-const jwt = require("jsonwebtoken");
 const authMiddleware = require("../../../middleware/authMiddleware");
 
 //like
@@ -12,7 +11,9 @@ router.patch("/like", authMiddleware, async (req, res) => {
   const userId = req.user.id;
 
   if (!id || !userId || !likeType) {
-    return res.status(422).json({ error: "Dados incompletos" });
+    return res
+      .status(422)
+      .json({ success: false, message: "dados incompletos" });
   }
 
   try {
@@ -22,16 +23,21 @@ router.patch("/like", authMiddleware, async (req, res) => {
       });
       res
         .status(200)
-        .json({ isValid: true, message: "Post unliked successfully" });
+        .json({ success: true, message: "post discutido com sucesso" });
       return;
     }
 
     await Post.findByIdAndUpdate(id, {
       $addToSet: { likes: { userId: userId } },
     });
-    res.status(200).json({ isValid: true, message: "Post liked successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "post curtido com sucesso" });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: "Internal server error" });
+    console.error("erro ao curtir post:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "erro interno do servidor" });
   }
 });
 

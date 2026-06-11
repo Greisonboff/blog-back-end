@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../../../../models/Post");
 const authMiddleware = require("../../../../middleware/authMiddleware");
-const jwt = require("jsonwebtoken");
 const { ObjectId } = require("mongodb");
 
 //update comment
@@ -12,18 +11,15 @@ router.patch(
   async (req, res) => {
     const { postId, commentId } = req.params;
     const { content } = req.body;
-    console.log("content", postId, "commetn", commentId);
+
     if (!content) {
-      return res
-        .status(422)
-        .json({ isValid: false, error: "At least one field must be sent" });
+      return res.status(422).json({
+        success: false,
+        message: "pelo menos um campo deve ser enviado",
+      });
     }
 
-    const token = req.cookies.token;
-
-    const decodedUserId = token
-      ? jwt.verify(token, process.env.JWT_SECRET)
-      : { id: null };
+    const userId = req.user.id ? req.user.id : null;
 
     try {
       const updatedPost = await Post.findOneAndUpdate(
@@ -32,7 +28,7 @@ router.patch(
           comments: {
             $elemMatch: {
               _id: commentId,
-              user: decodedUserId.id,
+              user: userId,
             },
           },
         },
@@ -46,17 +42,20 @@ router.patch(
       );
 
       if (!updatedPost) {
-        return res
-          .status(404)
-          .json({ isValid: false, error: "Post or comment not found" });
+        return res.status(404).json({
+          success: false,
+          message: "post ou comentário nao encontrado",
+        });
       }
 
       res
         .status(200)
-        .json({ isValid: true, message: "Comment updated successfully" });
+        .json({ success: true, message: "comentário atualizado com sucesso" });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ isValid: false, error: "Internal server error" });
+      console.log("erro ao atualizar comentário:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "erro interno do servidor" });
     }
   },
 );

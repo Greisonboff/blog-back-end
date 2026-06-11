@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const Post = require("../../../models/Post");
-const jwt = require("jsonwebtoken");
 const authMiddleware = require("../../../middleware/authMiddleware");
 
 //delete
@@ -13,18 +12,23 @@ router.delete("/:id", authMiddleware, async (req, res) => {
     if (!post)
       return res
         .status(404)
-        .json({ isValid: false, error: "Post não encontrado" });
+        .json({ success: false, message: "Post não encontrado" });
 
     if (post.user.toString() !== req.user.id) {
-      return res.status(403).json({ isValid: false, error: "Não autorizado" });
+      return res
+        .status(403)
+        .json({ success: false, message: "não autorizado" });
     }
 
     await post.deleteOne();
     res
       .status(200)
-      .json({ isValid: true, message: "Post deleted successfully" });
+      .json({ success: true, message: "post deletado com sucesso" });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: "Internal server error" });
+    console.error("erro ao deletar post:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "erro interno do servidor" });
   }
 });
 

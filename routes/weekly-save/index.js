@@ -35,7 +35,7 @@ Considere a data atual como referência para determinar a "semana atual".
 
 router.post("/", async (req, res) => {
   if (req.headers.authorization !== process.env.CRON_SECRET) {
-    return res.status(403).json({ error: "Não autorizado" });
+    return res.status(403).json({ success: false, message: "não autorizado" });
   }
 
   try {
@@ -61,13 +61,9 @@ router.post("/", async (req, res) => {
 
     const data = await response.json();
 
-    console.log(data.choices[0].message.content);
-
     const parsedData = JSON.parse(data.choices[0].message.content);
 
     const topic = parsedData.topic;
-
-    console.log("title", topic.title, "description", topic.description);
 
     await Post.create({
       title: topic.title,
@@ -78,12 +74,15 @@ router.post("/", async (req, res) => {
 
     // Lógica para salvar os dados da semana
     return res.status(200).json({
-      message: "Dados salvos com sucesso",
-      dados: data.choices[0].message.content,
+      success: true,
+      message: "dados salvos com sucesso",
+      data: data.choices[0].message.content,
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ error: "Erro ao salvar dados" });
+    console.error("erro ao salvar dados:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "erro ao salvar dados" });
   }
 });
 

@@ -13,7 +13,9 @@ router.delete(
     const { postId, commentId } = req.params;
 
     if (!postId || !commentId) {
-      return res.status(422).json({ isValid: false, error: "Invalid data" });
+      return res
+        .status(422)
+        .json({ success: false, message: "dados incompletos" });
     }
 
     try {
@@ -34,15 +36,17 @@ router.delete(
       if (!updatedPost) {
         return res
           .status(404)
-          .json({ isValid: false, error: "Post or comment not found" });
+          .json({ success: false, message: "post nao encontrado" });
       }
 
       res
         .status(200)
-        .json({ isValid: true, message: "Comment deleted successfully" });
+        .json({ success: true, message: "comentario deletado com sucesso" });
     } catch (error) {
-      console.log(error);
-      res.status(500).json({ isValid: false, error: "Internal server error" });
+      console.error("erro ao deletar comentario:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "erro interno do servidor" });
     }
   },
 );

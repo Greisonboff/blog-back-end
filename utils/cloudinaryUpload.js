@@ -14,7 +14,7 @@ export function cloudinaryUpload(newImage, imagePublicId) {
         try {
           await cloudinary.uploader.destroy(imagePublicId);
         } catch (err) {
-          console.log("Erro ao deletar antiga:", err);
+          console.error("erro ao deletar imagem antiga:", err);
         }
       }
 

@@ -10,12 +10,19 @@ router.delete("/:id", async (req, res) => {
     const deletedPerson = await Person.deleteOne({ _id: id });
 
     if (deletedPerson.deletedCount === 0) {
-      return res.status(424).json({ message: "Person not found" });
+      return res
+        .status(424)
+        .json({ success: false, message: "usuario nao encontrado" });
     }
 
-    res.status(200).json({ message: "Person deleted successfully" });
+    res
+      .status(200)
+      .json({ success: true, message: "usuario deletado com sucesso" });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: "Internal server error" });
+    console.error("erro ao deletar usuário:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "erro interno do servidor" });
   }
 });
 

@@ -21,19 +21,35 @@ router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
     const imagePath = req.uploadedImage ?? null;
 
     // Validações
-    if (!name) return res.status(422).json({ error: "name is required" });
-    if (!email) return res.status(422).json({ error: "email is required" });
+    if (!name)
+      return res
+        .status(422)
+        .json({ success: false, message: "nome é obrigatório" });
+    if (!email)
+      return res
+        .status(422)
+        .json({ success: false, message: "email é obrigatório" });
     if (!isValidEmail(email))
-      return res.status(422).json({ error: "email is invalid" });
+      return res
+        .status(422)
+        .json({ success: false, message: "email inválido" });
     const emailExists = await Person.findOne({ email });
     if (emailExists)
-      return res.status(422).json({ error: "email already exists" });
+      return res
+        .status(422)
+        .json({ success: false, message: "email ja cadastrado" });
     if (!password)
-      return res.status(422).json({ error: "password is required" });
+      return res
+        .status(422)
+        .json({ success: false, message: "senha é obrigatória" });
     if (!confirmPassword)
-      return res.status(422).json({ error: "confirm password is required" });
+      return res
+        .status(422)
+        .json({ success: false, message: "confirmar senha é obrigatória" });
     if (password !== confirmPassword)
-      return res.status(422).json({ error: "passwords do not match" });
+      return res
+        .status(422)
+        .json({ success: false, message: "senhas nao conferem" });
 
     const hashedPassword = await hashPassword(password);
 
@@ -63,8 +79,8 @@ router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
       })
       .status(201)
       .json({
-        isValid: true,
-        message: "Person created successfully",
+        success: true,
+        message: "usuario criado com sucesso",
         user: {
           name: user.name,
           email: user.email,
@@ -73,11 +89,15 @@ router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
         },
       });
   } catch (error) {
-    console.error("Error in user creation:", error);
+    console.error("erro ao criar usuário:", error);
     if (error.message.includes("duplicate key error")) {
-      return res.status(400).json({ error: "Email already exists" });
+      return res
+        .status(400)
+        .json({ success: false, message: "email ja cadastrado" });
     }
-    res.status(500).json({ isValid: false, error: "Internal server error" });
+    res
+      .status(500)
+      .json({ success: false, message: "erro interno do servidor" });
   }
 });
 

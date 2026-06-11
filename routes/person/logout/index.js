@@ -7,7 +7,7 @@ router.post("/logout", (req, res) => {
     sameSite: "strict",
   });
 
-  res.status(200).json({ isValid: true, message: "Logout successful" });
+  res.status(200).json({ success: true, message: "deslogado com sucesso" });
 });
 
 module.exports = router;

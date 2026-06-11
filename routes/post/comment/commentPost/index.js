@@ -3,7 +3,6 @@ const router = express.Router();
 
 const Post = require("../../../../models/Post");
 const Person = require("../../../../models/Person");
-const jwt = require("jsonwebtoken");
 const authMiddleware = require("../../../../middleware/authMiddleware");
 
 const { ObjectId } = require("mongodb");
@@ -12,17 +11,18 @@ const { ObjectId } = require("mongodb");
 router.patch("/comment", authMiddleware, async (req, res) => {
   const { id, comment } = req.body;
 
-  const token = req.cookies.token;
-
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  const userId = decoded.id;
+  const userId = req.user.id;
 
   if (!userId) {
-    return res.status(422).json({ isValid: false, error: "user is required" });
+    return res
+      .status(422)
+      .json({ success: false, message: "dados incompletos" });
   }
 
   if (!id || !comment) {
-    return res.status(422).json({ isValid: false, error: "Dados incompletos" });
+    return res
+      .status(422)
+      .json({ success: false, message: "dados incompletos" });
   }
 
   const commentObj = {
@@ -36,9 +36,12 @@ router.patch("/comment", authMiddleware, async (req, res) => {
     });
     res
       .status(200)
-      .json({ isValid: true, message: "Comment added successfully" });
+      .json({ success: true, message: "comentario adicionado com sucesso" });
   } catch (error) {
-    res.status(500).json({ isValid: false, error: "Internal server error" });
+    console.error("erro ao comentar post:", error);
+    res
+      .status(500)
+      .json({ success: false, message: "erro interno do servidor" });
   }
 });
 

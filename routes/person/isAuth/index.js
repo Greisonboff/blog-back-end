@@ -9,6 +9,7 @@ router.get("/isAuth", authMiddleware, async (req, res) => {
     const userId = req.user.id;
     const person = await Person.findOne({ _id: userId });
     res.status(200).json({
+      success: true,
       isLoggedIn: true,
       user: {
         name: person.name,
@@ -18,7 +19,13 @@ router.get("/isAuth", authMiddleware, async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ isLoggedIn: false, error: "Internal server error" });
+    console.error("erro ao verificar autenticacao:", error);
+
+    res.status(500).json({
+      suscess: false,
+      isLoggedIn: false,
+      message: "erro interno do servidor",
+    });
   }
 });
 

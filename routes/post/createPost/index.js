@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 
 const Post = require("../../../models/Post");
-const jwt = require("jsonwebtoken");
 const authMiddleware = require("../../../middleware/authMiddleware");
 const Person = require("../../../models/Person");
 
@@ -32,13 +31,13 @@ router.post(
     if (!title) {
       return res
         .status(422)
-        .json({ isValid: false, error: "title is required" });
+        .json({ success: false, message: "title is required" });
     }
 
     if (!content) {
       return res
         .status(422)
-        .json({ isValid: false, error: "content is required" });
+        .json({ success: false, message: "content is required" });
     }
 
     const post = {
@@ -54,9 +53,12 @@ router.post(
       await Post.create(post);
       res
         .status(200)
-        .json({ isValid: true, message: "Post created successfully" });
+        .json({ success: true, message: "post criado com sucesso" });
     } catch (error) {
-      res.status(500).json({ isValid: false, error: "Internal server error" });
+      console.error("erro ao criar post:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "erro interno do servidor" });
     }
   },
 );

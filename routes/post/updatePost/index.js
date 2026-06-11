@@ -27,9 +27,10 @@ router.patch(
     const { title, description, category, content, removeImage } = req.body;
 
     if (!title && !description && !category && !content && !removeImage) {
-      return res
-        .status(422)
-        .json({ isValid: false, error: "At least one field must be sent" });
+      return res.status(422).json({
+        success: false,
+        message: "pelo menos um campo deve ser enviado.",
+      });
     }
 
     const imagePath = req.uploadedImage;
@@ -50,9 +51,12 @@ router.patch(
       await Post.findByIdAndUpdate(id, post);
       res
         .status(200)
-        .json({ isValid: true, message: "Post updated successfully" });
+        .json({ success: true, message: "post atualizado com sucesso" });
     } catch (error) {
-      res.status(500).json({ isValid: false, error: "Internal server error" });
+      console.error("erro ao atualizar post:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "erro interno do servidor" });
     }
   },
 );

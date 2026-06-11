@@ -33,15 +33,17 @@ router.get("/", async (req, res) => {
     const data = formatPostData(posts, decoded);
 
     res.status(200).json({
-      isValid: true,
+      success: true,
       posts: data,
       total,
       currentPage: Number(page),
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
-    console.log("error: ", error);
-    res.status(500).json({ isValid: false, error: "Internal server error" });
+    console.error("erro ao buscar posts: ", error);
+    res
+      .status(500)
+      .json({ success: false, message: "erro interno do servidor" });
   }
 });
 

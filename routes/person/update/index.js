@@ -21,7 +21,9 @@ router.patch(
     const currentPerson = await Person.findById(req.user.id);
 
     if (!currentPerson) {
-      return res.status(424).json({ message: "Person not found" });
+      return res
+        .status(424)
+        .json({ success: false, message: "usuario nao encontrado" });
     }
 
     req.currentImagePublicId = currentPerson.img?.public_id;
@@ -37,16 +39,11 @@ router.patch(
 
       const { currentPerson } = req;
 
-      console.log("Received data:", {
-        name,
-        email,
-        img,
-      });
-
       if (!name && !email && !password && !confirmPassword) {
-        return res
-          .status(422)
-          .json({ error: "At least one field must be sent", isValid: false });
+        return res.status(422).json({
+          success: false,
+          message: "pelo menos um campo deve ser enviado.",
+        });
       }
 
       const imagePath = req.uploadedImage;
@@ -62,7 +59,7 @@ router.patch(
       if (password && password !== confirmPassword) {
         return res
           .status(422)
-          .json({ error: "passwords do not match", isValid: false });
+          .json({ success: false, message: "passwords do not match" });
       }
 
       if (name && currentPerson.name !== name) {
@@ -73,7 +70,7 @@ router.patch(
         if (!isValidEmail(email)) {
           return res
             .status(422)
-            .json({ error: "email is invalid", isValid: false });
+            .json({ success: false, message: "email inválido" });
         }
         person.email = email;
       }
@@ -87,17 +84,19 @@ router.patch(
       if (updatedPerson.matchedCount === 0) {
         return res
           .status(424)
-          .json({ message: "Person not found", isValid: false });
+          .json({ success: false, message: "usuario nao encontrado" });
       }
 
       res.status(200).json({
-        message: "Person updated successfully",
-        isValid: true,
+        message: "usuario atualizado com sucesso",
+        success: true,
         person: person,
       });
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal server error", isValid: false });
+      console.error("erro ao atualizar usuário:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "erro interno do servidor" });
     }
   },
 );

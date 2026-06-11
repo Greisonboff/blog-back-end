@@ -14,7 +14,9 @@ export const handleImageUpload = async (req, res, next) => {
     const fileType = await fileTypeFromBuffer(file.buffer);
 
     if (!fileType || !["image/png", "image/jpeg"].includes(fileType.mime)) {
-      return res.status(400).json({ error: "Arquivo inválido" });
+      return res
+        .status(400)
+        .json({ success: false, message: "arquivo inválido" });
     }
 
     const result = await cloudinaryUpload(
