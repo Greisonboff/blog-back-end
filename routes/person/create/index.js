@@ -29,15 +29,12 @@ router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
       return res
         .status(422)
         .json({ success: false, message: "email é obrigatório" });
-    if (!isValidEmail(email))
+
+    const emailValidation = await isValidEmail(email);
+    if (!emailValidation.success)
       return res
         .status(422)
-        .json({ success: false, message: "email inválido" });
-    const emailExists = await Person.findOne({ email });
-    if (emailExists)
-      return res
-        .status(422)
-        .json({ success: false, message: "email ja cadastrado" });
+        .json({ success: false, message: emailValidation.message });
     if (!password)
       return res
         .status(422)

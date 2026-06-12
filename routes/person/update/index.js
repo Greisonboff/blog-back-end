@@ -67,10 +67,11 @@ router.patch(
       }
 
       if (email && currentPerson.email !== email) {
-        if (!isValidEmail(email)) {
+        const validateEmail = await isValidEmail(email);
+        if (!validateEmail.success) {
           return res
             .status(422)
-            .json({ success: false, message: "email inválido" });
+            .json({ success: false, message: validateEmail.message });
         }
         person.email = email;
       }

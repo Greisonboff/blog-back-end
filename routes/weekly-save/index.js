@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
 
   const rssObject = parser.parse(xml);
 
-  const article = rssObject.rss.channel.item[0];
+  const articleObject = rssObject.rss.channel.item;
 
   try {
     //   const response = await fetch(
@@ -40,6 +40,16 @@ router.post("/", async (req, res) => {
     //       }),
     //     },
     //   );
+
+    const post = await Post.findOne({
+      user: process.env.ADMIN_ID,
+    }).sort({
+      createdAt: -1,
+    });
+
+    const article = articleObject.find((article) => {
+      return article.title !== post.title;
+    });
 
     await Post.create({
       title: article.title.replace(/"/g, '\\"'),
