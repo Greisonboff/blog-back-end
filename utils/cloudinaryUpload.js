@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from "cloudinary";
+const { v2: cloudinary } = require("cloudinary");
 
 cloudinary.config({
   cloud_name: process.env.CLOUD_NAME,
@@ -6,7 +6,7 @@ cloudinary.config({
   api_secret: process.env.CLOUD_SECRET,
 });
 
-export function cloudinaryUpload(newImage, imagePublicId) {
+async function cloudinaryUpload(newImage, imagePublicId) {
   return new Promise(async (resolve, reject) => {
     try {
       // 1️⃣ Deleta imagem antiga
@@ -46,3 +46,5 @@ export function cloudinaryUpload(newImage, imagePublicId) {
     }
   });
 }
+
+module.exports = { cloudinaryUpload };
