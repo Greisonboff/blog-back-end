@@ -9,7 +9,7 @@ async function tavilyGet(prompt) {
       includeAnswer: "basic",
       topic: "news",
       searchDepth: "basic",
-      maxResults: 2,
+      maxResults: 10,
       timeRange: "week",
       includeUsage: true,
       includeRawContent: "text",

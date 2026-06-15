@@ -52,7 +52,7 @@ router.patch(
         .status(200)
         .json({ success: true, message: "comentário atualizado com sucesso" });
     } catch (error) {
-      console.log("erro ao atualizar comentário:", error);
+      console.error("erro ao atualizar comentário:", error);
       res
         .status(500)
         .json({ success: false, message: "erro interno do servidor" });

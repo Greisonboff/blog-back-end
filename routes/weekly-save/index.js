@@ -36,25 +36,42 @@ router.post("/", async (req, res) => {
       .json({ success: false, message: "erro ao buscar notícias" });
   }
 
-  console.log(" a resposta e:", response);
-
   try {
     const { data } = response;
 
-    await Promise.all(
-      data.map((article) =>
-        Post.create({
-          title: article.title,
-          content: article.content,
-          user: process.env.ADMIN_ID,
-          images: null,
-        }),
-      ),
-    );
+    let novoPost = null;
 
-    console.log("dados salvos com sucesso");
+    for (const article of data) {
+      const hasPost = await Post.findOne({
+        title: article.title,
+      });
 
-    return res.status(200).json(response);
+      if (!hasPost) {
+        novoPost = article;
+        break;
+      }
+    }
+
+    if (!novoPost) {
+      return res.status(200).json({
+        success: false,
+        message: "Nenhuma notícia nova encontrada",
+        data: [],
+      });
+    }
+
+    await Post.create({
+      title: novoPost.title,
+      content: novoPost.content,
+      user: process.env.ADMIN_ID,
+      images: null,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "sucesso ao salvar dados",
+      data: novoPost,
+    });
   } catch (error) {
     console.error("erro ao salvar dados de notícias da semana:", error);
 
