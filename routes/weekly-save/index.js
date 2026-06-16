@@ -56,7 +56,7 @@ router.post("/", async (req, res) => {
       return res.status(200).json({
         success: false,
         message: "Nenhuma notícia nova encontrada",
-        data: [],
+        data: null,
       });
     }
 
@@ -78,6 +78,7 @@ router.post("/", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "erro ao salvar dados",
+      data: null,
     });
   }
 });
