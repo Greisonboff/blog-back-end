@@ -1,42 +1,25 @@
 const express = require("express");
 const Post = require("../../models/Post");
-const huggingface = require("../ia/huggingface");
-const tavilyGet = require("../ia/tavily");
 const router = express.Router();
-const wired = require("../search-feed/wired");
-
-const prompt = `Você é especialista em tecnologia. Retorne apenas 1 tema de tecnologia mais relevante da semana atual. Responda somente com JSON válido, sem markdown ou texto extra. Use português do Brasil, informações reais e atuais e uma URL de imagem válida.
-
-{"week_reference":"YYYY-MM-DD","topic":{"title":"Até 30 caracteres","description":"Resumo","image":"https://imagem.jpg"}}`;
+const { fetchTrendingNews } = require("../../services/news-client");
 
 router.post("/", async (req, res) => {
-  if (req.headers.authorization !== process.env.CRON_SECRET) {
-    return res.status(403).json({ success: false, message: "não autorizado" });
-  }
-
-  const providers = [
-    () => tavilyGet(prompt),
-    () => huggingface(prompt),
-    () => wired(),
-  ];
-
-  let response = null;
-
-  for (const provider of providers) {
-    response = await provider();
-
-    if (response?.success) {
-      break;
-    }
-  }
-
-  if (!response || !response.success) {
-    return res
-      .status(500)
-      .json({ success: false, message: "erro ao buscar notícias" });
-  }
-
   try {
+    if (req.headers.authorization !== process.env.CRON_SECRET) {
+      return res
+        .status(403)
+        .json({ success: false, message: "não autorizado" });
+    }
+
+    const response = await fetchTrendingNews();
+
+    console.log(response);
+    if (!response || !response.sucess) {
+      return res
+        .status(500)
+        .json({ success: false, message: "erro ao buscar notícias" });
+    }
+
     const { data } = response;
 
     let novoPost = null;
