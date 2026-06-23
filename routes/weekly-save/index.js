@@ -54,6 +54,7 @@ router.post("/", async (req, res) => {
       success: true,
       message: "sucesso ao salvar dados",
       data: novoPost,
+      provider: response.provider,
     });
   } catch (error) {
     console.error("erro ao salvar dados de notícias da semana:", error);
