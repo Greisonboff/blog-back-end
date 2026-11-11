@@ -14,7 +14,7 @@ router.post("/", async (req, res) => {
     const response = await fetchTrendingNews();
 
     console.log(response);
-    if (!response || !response.sucess) {
+    if (!response || !response.success) {
       return res
         .status(500)
         .json({ success: false, message: "erro ao buscar notícias" });
