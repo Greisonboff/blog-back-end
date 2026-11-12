@@ -47,4 +47,13 @@ async function cloudinaryUpload(newImage, imagePublicId) {
   });
 }
 
-module.exports = { cloudinaryUpload };
+async function cloudinaryDelete(publicId) {
+  if (!publicId) return;
+  try {
+    await cloudinary.uploader.destroy(publicId);
+  } catch (err) {
+    console.error("erro ao deletar imagem:", err);
+  }
+}
+
+module.exports = { cloudinaryUpload, cloudinaryDelete };

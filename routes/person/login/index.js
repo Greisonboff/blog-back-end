@@ -19,7 +19,7 @@ router.post("/login", async (req, res) => {
         .status(422)
         .json({ success: false, message: "password is required" });
 
-    const user = await Person.findOne({ email });
+    const user = await Person.findOne({ email }).select("+password");
 
     if (!user || !user.password)
       return res

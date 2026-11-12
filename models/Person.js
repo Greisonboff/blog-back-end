@@ -5,7 +5,7 @@ const Person = mongoose.model("Person", {
   img: { url: String, public_id: String },
   avatarColar: String,
   email: String,
-  password: String,
+  password: { type: String, select: false },
 });
 
 module.exports = Person;

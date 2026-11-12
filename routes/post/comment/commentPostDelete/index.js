@@ -22,6 +22,9 @@ router.delete(
       const updatedPost = await Post.findOneAndUpdate(
         {
           _id: postId,
+          comments: {
+            $elemMatch: { _id: commentId, user: req.user.id },
+          },
         },
         {
           $pull: {
@@ -36,7 +39,10 @@ router.delete(
       if (!updatedPost) {
         return res
           .status(404)
-          .json({ success: false, message: "post nao encontrado" });
+          .json({
+            success: false,
+            message: "post ou comentário nao encontrado",
+          });
       }
 
       res

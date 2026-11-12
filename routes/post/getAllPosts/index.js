@@ -20,7 +20,7 @@ router.get("/", async (req, res) => {
       .skip(skip)
       .limit(Number(limit))
       .populate("user", "name img avatarColar -_id")
-      .populate("comments.user");
+      .populate("comments.user", "name img avatarColar");
 
     const token = req.cookies.token;
 

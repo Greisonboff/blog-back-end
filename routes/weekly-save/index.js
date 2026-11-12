@@ -2,10 +2,21 @@ const express = require("express");
 const Post = require("../../models/Post");
 const router = express.Router();
 const { fetchTrendingNews } = require("../../services/news-client");
+const crypto = require("crypto");
+
+// recusa se CRON_SECRET não estiver definido; comparação em tempo constante
+function isAuthorizedCron(header) {
+  const secret = process.env.CRON_SECRET;
+  if (!secret || typeof header !== "string") return false;
+
+  const a = Buffer.from(header);
+  const b = Buffer.from(secret);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 router.post("/", async (req, res) => {
   try {
-    if (req.headers.authorization !== process.env.CRON_SECRET) {
+    if (!isAuthorizedCron(req.headers.authorization)) {
       return res
         .status(403)
         .json({ success: false, message: "não autorizado" });
@@ -13,7 +24,6 @@ router.post("/", async (req, res) => {
 
     const response = await fetchTrendingNews();
 
-    console.log(response);
     if (!response || !response.success) {
       return res
         .status(500)
