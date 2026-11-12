@@ -5,6 +5,7 @@ const Person = require("../../../models/Person");
 const { hashPassword } = require("../../../utils/hashPassword");
 const { isValidEmail } = require("../../../utils/isValidEmail");
 const { generateToken } = require("../../../utils/generateToken");
+const { normalizeEmail } = require("../../../utils/normalizeEmail");
 
 const multer = require("multer");
 const { handleImageUpload } = require("../../../middleware/handleImageUpload");
@@ -17,7 +18,8 @@ const upload = multer({
 router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
   try {
     // Extrair campos do formulário
-    const { name, email, password, confirmPassword } = req.body;
+    const { name, password, confirmPassword } = req.body;
+    const email = normalizeEmail(req.body.email);
     const imagePath = req.uploadedImage ?? null;
 
     // Validações
@@ -87,7 +89,7 @@ router.post("/", upload.single("img"), handleImageUpload, async (req, res) => {
       });
   } catch (error) {
     console.error("erro ao criar usuário:", error);
-    if (error.message.includes("duplicate key error")) {
+    if (error.code === 11000) {
       return res
         .status(400)
         .json({ success: false, message: "email ja cadastrado" });

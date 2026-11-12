@@ -4,11 +4,13 @@ const router = express.Router();
 const Post = require("../../../../models/Post");
 
 const authMiddleware = require("../../../../middleware/authMiddleware");
+const validateObjectId = require("../../../../middleware/validateObjectId");
 
 //update comment
 router.delete(
   "/comment/:postId/:commentId",
   authMiddleware,
+  validateObjectId("postId", "commentId"),
   async (req, res) => {
     const { postId, commentId } = req.params;
 

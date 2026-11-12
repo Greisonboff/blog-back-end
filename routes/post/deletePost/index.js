@@ -3,9 +3,10 @@ const router = express.Router();
 
 const Post = require("../../../models/Post");
 const authMiddleware = require("../../../middleware/authMiddleware");
+const validateObjectId = require("../../../middleware/validateObjectId");
 
 //delete
-router.delete("/:id", authMiddleware, async (req, res) => {
+router.delete("/:id", authMiddleware, validateObjectId("id"), async (req, res) => {
   const id = req.params.id;
   try {
     const post = await Post.findById(id);

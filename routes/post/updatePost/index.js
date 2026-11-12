@@ -64,7 +64,7 @@ router.patch(
 
     const imagePath = req.uploadedImage;
 
-    const post = {};
+    const post = { updatedAt: Date.now() };
 
     if (title) post.title = title;
     if (description) post.description = description;

@@ -3,30 +3,34 @@ const router = express.Router();
 
 const Post = require("../../../models/Post");
 const jwt = require("jsonwebtoken");
-const Person = require("../../../models/Person");
 
-const { ObjectId } = require("mongodb");
 const { formatPostData } = require("../../../utils/formatPostData");
+const { parsePagination } = require("../../../utils/pagination");
+
+// token ausente, expirado ou inválido: trata como visitante
+function decodeOptionalToken(token) {
+  if (!token) return { id: null };
+
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET);
+  } catch {
+    return { id: null };
+  }
+}
 
 //get all posts
 router.get("/", async (req, res) => {
   try {
-    const { page, limit = 10 } = req.query;
-
-    const skip = (Number(page) - 1) * Number(limit);
+    const { page, limit, skip } = parsePagination(req.query);
 
     const posts = await Post.find()
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(Number(limit))
-      .populate("user", "name img avatarColar -_id")
+      .limit(limit)
+      .populate("user", "name img avatarColar")
       .populate("comments.user", "name img avatarColar");
 
-    const token = req.cookies.token;
-
-    const decoded = token
-      ? jwt.verify(token, process.env.JWT_SECRET)
-      : { id: null };
+    const decoded = decodeOptionalToken(req.cookies.token);
 
     const total = await Post.countDocuments();
 
@@ -36,7 +40,7 @@ router.get("/", async (req, res) => {
       success: true,
       posts: data,
       total,
-      currentPage: Number(page),
+      currentPage: page,
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
