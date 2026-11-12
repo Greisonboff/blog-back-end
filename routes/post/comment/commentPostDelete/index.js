@@ -4,11 +4,13 @@ const router = express.Router();
 const Post = require("../../../../models/Post");
 
 const authMiddleware = require("../../../../middleware/authMiddleware");
+const validateObjectId = require("../../../../middleware/validateObjectId");
 
 //update comment
 router.delete(
   "/comment/:postId/:commentId",
   authMiddleware,
+  validateObjectId("postId", "commentId"),
   async (req, res) => {
     const { postId, commentId } = req.params;
 
@@ -22,6 +24,9 @@ router.delete(
       const updatedPost = await Post.findOneAndUpdate(
         {
           _id: postId,
+          comments: {
+            $elemMatch: { _id: commentId, user: req.user.id },
+          },
         },
         {
           $pull: {
@@ -36,7 +41,10 @@ router.delete(
       if (!updatedPost) {
         return res
           .status(404)
-          .json({ success: false, message: "post nao encontrado" });
+          .json({
+            success: false,
+            message: "post ou comentário nao encontrado",
+          });
       }
 
       res

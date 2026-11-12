@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 
 const Person = require("../../../models/Person");
 const { generateToken } = require("../../../utils/generateToken");
+const { normalizeEmail } = require("../../../utils/normalizeEmail");
 
 //login
 router.post("/login", async (req, res) => {
@@ -19,7 +20,9 @@ router.post("/login", async (req, res) => {
         .status(422)
         .json({ success: false, message: "password is required" });
 
-    const user = await Person.findOne({ email });
+    const user = await Person.findOne({ email: normalizeEmail(email) }).select(
+      "+password",
+    );
 
     if (!user || !user.password)
       return res

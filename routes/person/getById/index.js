@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 
 const Person = require("../../../models/Person");
+const authMiddleware = require("../../../middleware/authMiddleware");
 
 //get one user by id
-router.get("/id", async (req, res) => {
-  const userId = req.user.id ? req.user.id : null;
+router.get("/id", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
 
   try {
     const person = await Person.findOne({ _id: userId });

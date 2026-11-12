@@ -1,8 +1,11 @@
 const Person = require("../models/Person");
+const { normalizeEmail } = require("./normalizeEmail");
 
 async function isValidEmail(email) {
+  email = normalizeEmail(email);
+
   const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!regex.test(email)) {
+  if (typeof email !== "string" || !regex.test(email)) {
     return {
       success: false,
       message: "email inválido",

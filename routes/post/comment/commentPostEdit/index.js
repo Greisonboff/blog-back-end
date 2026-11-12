@@ -2,12 +2,14 @@ const express = require("express");
 const router = express.Router();
 const Post = require("../../../../models/Post");
 const authMiddleware = require("../../../../middleware/authMiddleware");
+const validateObjectId = require("../../../../middleware/validateObjectId");
 const { ObjectId } = require("mongodb");
 
 //update comment
 router.patch(
   "/comment/:postId/:commentId",
   authMiddleware,
+  validateObjectId("postId", "commentId"),
   async (req, res) => {
     const { postId, commentId } = req.params;
     const { content } = req.body;

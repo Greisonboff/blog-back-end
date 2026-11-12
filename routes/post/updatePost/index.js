@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 
 const Post = require("../../../models/Post");
@@ -21,6 +22,34 @@ router.patch(
   "/:id",
   upload.array("images", 5),
   authMiddleware,
+  // verifica dono antes de enviar qualquer imagem ao Cloudinary
+  async (req, res, next) => {
+    const id = req.params.id;
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ success: false, message: "id inválido" });
+    }
+
+    try {
+      const post = await Post.findById(id).select("user");
+
+      if (!post) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Post não encontrado" });
+      }
+
+      if (post.user?.toString() !== req.user.id) {
+        return res
+          .status(403)
+          .json({ success: false, message: "não autorizado" });
+      }
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  },
   handleImageUpload,
   async (req, res) => {
     const id = req.params.id;
@@ -35,7 +64,7 @@ router.patch(
 
     const imagePath = req.uploadedImage;
 
-    const post = {};
+    const post = { updatedAt: Date.now() };
 
     if (title) post.title = title;
     if (description) post.description = description;

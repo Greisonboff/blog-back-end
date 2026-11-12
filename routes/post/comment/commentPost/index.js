@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 
 const Post = require("../../../../models/Post");
@@ -23,6 +24,10 @@ router.patch("/comment", authMiddleware, async (req, res) => {
     return res
       .status(422)
       .json({ success: false, message: "dados incompletos" });
+  }
+
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ success: false, message: "id inválido" });
   }
 
   const commentObj = {

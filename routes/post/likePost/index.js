@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const router = express.Router();
 
 const Post = require("../../../models/Post");
@@ -16,20 +17,40 @@ router.patch("/like", authMiddleware, async (req, res) => {
       .json({ success: false, message: "dados incompletos" });
   }
 
+  if (!mongoose.isValidObjectId(id)) {
+    return res.status(400).json({ success: false, message: "id inválido" });
+  }
+
   try {
     if (likeType === "unlike") {
-      await Post.findByIdAndUpdate(id, {
-        $pull: { likes: { userId: userId } },
-      });
-      res
+      const result = await Post.updateOne(
+        { _id: id },
+        { $pull: { likes: { userId: userId } } },
+      );
+
+      if (result.matchedCount === 0) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Post não encontrado" });
+      }
+
+      return res
         .status(200)
-        .json({ success: true, message: "post discutido com sucesso" });
-      return;
+        .json({ success: true, message: "post descurtido com sucesso" });
     }
 
-    await Post.findByIdAndUpdate(id, {
-      $addToSet: { likes: { userId: userId } },
-    });
+    // só adiciona a curtida se o usuário ainda não curtiu (operação atômica)
+    const result = await Post.updateOne(
+      { _id: id, "likes.userId": { $ne: userId } },
+      { $push: { likes: { userId: userId } } },
+    );
+
+    if (result.matchedCount === 0 && !(await Post.exists({ _id: id }))) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Post não encontrado" });
+    }
+
     res
       .status(200)
       .json({ success: true, message: "post curtido com sucesso" });

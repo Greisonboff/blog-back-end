@@ -4,13 +4,12 @@ const router = express.Router();
 const Post = require("../../../models/Post");
 const authMiddleware = require("../../../middleware/authMiddleware");
 const { formatPostData } = require("../../../utils/formatPostData");
+const { parsePagination } = require("../../../utils/pagination");
 
 //get my posts
 router.post("/my-posts", authMiddleware, async (req, res) => {
   try {
-    const { page, limit = 10 } = req.query;
-
-    const skip = (Number(page) - 1) * Number(limit);
+    const { page, limit, skip } = parsePagination(req.query);
 
     const decoded = req.user;
     const userId = decoded.id;
@@ -18,10 +17,10 @@ router.post("/my-posts", authMiddleware, async (req, res) => {
     const posts = await Post.find({ user: userId })
       .sort({ createdAt: -1 })
       .skip(skip)
-      .limit(Number(limit))
+      .limit(limit)
       .populate("user", "name img avatarColar");
 
-    const total = await Post.find({ user: userId }).countDocuments();
+    const total = await Post.countDocuments({ user: userId });
 
     const data = formatPostData(posts, decoded);
 
@@ -29,7 +28,7 @@ router.post("/my-posts", authMiddleware, async (req, res) => {
       success: true,
       posts: data,
       total,
-      currentPage: Number(page),
+      currentPage: page,
       totalPages: Math.ceil(total / limit),
     });
   } catch (error) {
